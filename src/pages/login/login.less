@@ -1,6 +1,7 @@
 .login{
   height: 100%;
   background-image: url("./bg.jpg");
+  background-size: 100%;
   .login-header{
     display: flex;
     height: 80px;
@@ -13,6 +14,29 @@
     }
     h1{
       color: #fff;
+    }
+  }
+  .login-content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 400px;
+    height: 350px;
+    background-color: #fff;
+    margin: 50px auto 0;
+    h2{
+      font-size: 30px;
+      font-weight: bold;
+      margin: 30px 0 30px;
+      line-height: 1.5;
+    }
+    .login-input{
+      width: 320px;
+      height: 32px;
+    }
+    .login-button{
+      width: 320px;
+      height: 32px;
     }
   }
 }

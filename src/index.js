@@ -3,8 +3,7 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom'
 
 import App from './App.jsx';
-import './assets/reset.css'
-import './assets/index.less'
+import './assets/less/reset.less'
 
 ReactDOM.render(
   <Router>
