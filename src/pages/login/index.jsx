@@ -1,7 +1,7 @@
 import React,{Component} from 'react';
-import { Form, Icon, Input, Button, message } from 'antd';
-import axios from 'axios';
+import { Form, Icon, Input, Button } from 'antd';
 
+import { reqLogin } from '../../api'
 import logo from './logo.png'
 import './login.less'
 
@@ -11,11 +11,20 @@ class Login extends Component{
 
   handleSubmit = (e) => {
     e.preventDefault();
-    this.props.form.validateFields((errors, value) => { // this.props.form.validateFields 拿表单错误和收集表单数据
+    this.props.form.validateFields(async (errors, value) => { // this.props.form.validateFields 拿表单错误和收集表单数据
       // console.log(errors, value)
       if(!errors) {
         const { username, password } = value;
-        axios.post('/login',{ username, password })     // 没加配置对象导致一直返回的statue是1.===这里涉及跨域，用到代理服务器===
+
+        const result = await reqLogin(username, password);  // === 忘记加await，导致什么情况都进入Admin页面 ===
+        // console.log(result) // 返回的是data.data
+        if(result) {
+          this.props.history.replace('/')
+        }else {
+          this.props.form.resetFields(['password']);
+        }
+
+        /*axios.post('/login',{ username, password })     // 没加配置对象导致一直返回的statue是1.===这里涉及跨域，用到代理服务器===
           .then((res) => {                              // res就是postman测试api返回的那个内容
             const { data } = res;
 
@@ -30,7 +39,7 @@ class Login extends Component{
           .catch((err) => {
             message.error('网络故障，请刷新网页~',2);
             this.props.form.resetFields(['password'])
-          })
+          })*/
       }else {
         console.log('表单校验失败' + errors)
       }
