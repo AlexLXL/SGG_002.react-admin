@@ -1,16 +1,25 @@
-import React,{Component} from 'react';
+import React, { Component } from 'react';
 
-import './header-main.less'
+import MyButton from '../my-button';
 
-export default class HeaderMain extends Component{
+import logo from '../../assets/images/logo.png';
+import './index.less';
+
+export default class HeaderMain extends Component {
   render() {
     return <div>
       <div className="header-main-top">
-        <span>欢迎，</span>
-        <span>xxx</span>
-        <button className="my-button">退出</button>
+        <span>欢迎, admin</span>
+        <MyButton>退出</MyButton>
       </div>
-      <div className="header-main-bottom"></div>
-    </div>
+      <div className="header-main-bottom">
+        <span className="header-main-left">用户管理</span>
+        <div className="header-main-right">
+          <span>{Date.now()}</span>
+          <img src={logo} alt=""/>
+          <span>晴</span>
+        </div>
+      </div>
+    </div>;
   }
 }
