@@ -3,8 +3,9 @@ import { Layout } from 'antd';
 
 import LeftNav from '../../components/left-nav'
 import HeaderMain from '../../components/header-main'
-const { Header, Content, Footer, Sider } = Layout;
+import {getItem} from "../../utils/storage-tools";
 
+const { Header, Content, Footer, Sider } = Layout;
 
 export default class Admin extends Component{
   state = {
@@ -17,8 +18,8 @@ export default class Admin extends Component{
   };
 
   componentWillMount() {
+    const user = getItem();
 
-    const user = JSON.parse(localStorage.getItem('USER_TIME'));
     if(!user || !user._id) {
       this.props.history.replace('/login');
     }

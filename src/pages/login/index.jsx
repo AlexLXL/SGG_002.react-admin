@@ -4,6 +4,7 @@ import { Form, Icon, Input, Button } from 'antd';
 import { reqLogin } from '../../api'
 import logo from '../../assets/images/logo.png'
 import './login.less'
+import { setItem } from "../../utils/storage-tools";
 
 const Item = Form.Item;   //缓存
 
@@ -20,7 +21,9 @@ class Login extends Component{
         // console.log(result) // 返回的是data.data
 
         if(result) {
-          localStorage.setItem('USER_TIME', JSON.stringify(result));           // 登录成功设置localstorage
+          setItem(result);
+
+          // localStorage.setItem('USER_KEY', JSON.stringify(result));           // 登录成功设置localstorage
           this.props.history.replace('/')
         }else {
           this.props.form.resetFields(['password']);
