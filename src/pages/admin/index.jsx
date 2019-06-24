@@ -4,6 +4,7 @@ import { Layout } from 'antd';
 import LeftNav from '../../components/left-nav'
 import HeaderMain from '../../components/header-main'
 import {getItem} from "../../utils/storage-tools";
+import {reqValidateUserInfo} from "../../api";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -17,12 +18,26 @@ export default class Admin extends Component{
     this.setState({ collapsed });
   };
 
-  componentWillMount() {
+  async componentWillMount() {
     const user = getItem();
 
-    if(!user || !user._id) {
-      this.props.history.replace('/login');
+    if(user && user._id) {  // 写少了_，不进入
+      const result = await reqValidateUserInfo(user._id);
+      if(result) return
     }
+
+    this.props.history.replace('/login');
+
+    /*if(!user || !user._id) {
+      // === 没有id的时候直接跳转login ===
+      this.props.history.replace('/login');
+    }else {
+      // === 有id的时候呀验证id是否伪造 ===
+      const result = await reqValidateUserInfo(user._id);   // ajax发回来的都是data.data
+      if(!result) {
+        this.props.history.replace('/login');
+      }
+    }*/
   }
 
   render() {

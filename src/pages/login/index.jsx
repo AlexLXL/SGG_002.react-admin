@@ -16,13 +16,11 @@ class Login extends Component{
       // console.log(errors, value)
       if(!errors) {
         const { username, password } = value;
-
         const result = await reqLogin(username, password);    // === 忘记加await，导致什么情况都进入Admin页面 ===
         // console.log(result) // 返回的是data.data
 
         if(result) {
           setItem(result);
-
           // localStorage.setItem('USER_KEY', JSON.stringify(result));           // 登录成功设置localstorage
           this.props.history.replace('/')
         }else {
