@@ -1,7 +1,7 @@
 import axios from "axios";
 import { message } from "antd";
 
-export default function ajax(url, data, method) { // data用的时候传的就是对象
+export default function ajax(url, data, method='get') { // data用的时候传的就是对象
   let reqParam = data;
   method = method.toLowerCase();
 

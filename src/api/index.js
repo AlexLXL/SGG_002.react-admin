@@ -28,3 +28,5 @@ export const reqWeather = function () { // 为了防止每次有模块加载api�
   })
 };
 
+export const reqCategory = (parentId) => Ajax('/manage/category/list',{parentId});
+
