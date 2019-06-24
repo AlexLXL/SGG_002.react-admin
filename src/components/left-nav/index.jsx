@@ -45,8 +45,6 @@ class LeftNav extends Component{
               if(item.key === pathname) {
                 (this.openKey = menu.key)
               }
-
-
               return this.createMenu(item);
             })
           }
@@ -54,7 +52,7 @@ class LeftNav extends Component{
       } else {
         return this.createMenu(menu); // 一级
       }
-    })
+    });
     this.selectedKey = pathname
   }
 

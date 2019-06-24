@@ -16,6 +16,14 @@ export default class Admin extends Component{
     this.setState({ collapsed });
   };
 
+  componentWillMount() {
+
+    const user = JSON.parse(localStorage.getItem('USER_TIME'));
+    if(!user || !user._id) {
+      this.props.history.replace('/login');
+    }
+  }
+
   render() {
     const {collapsed} = this.state;
 

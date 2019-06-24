@@ -16,24 +16,26 @@ class Login extends Component{
       if(!errors) {
         const { username, password } = value;
 
-        const result = await reqLogin(username, password);  // === 忘记加await，导致什么情况都进入Admin页面 ===
+        const result = await reqLogin(username, password);    // === 忘记加await，导致什么情况都进入Admin页面 ===
         // console.log(result) // 返回的是data.data
+
         if(result) {
+          localStorage.setItem('USER_TIME', JSON.stringify(result));           // 登录成功设置localstorage
           this.props.history.replace('/')
         }else {
           this.props.form.resetFields(['password']);
         }
 
-        /*axios.post('/login',{ username, password })     // 没加配置对象导致一直返回的statue是1.===这里涉及跨域，用到代理服务器===
-          .then((res) => {                              // res就是postman测试api返回的那个内容
+        /*axios.post('/login',{ username, password })         // 没加配置对象导致一直返回的statue是1.===这里涉及跨域，用到代理服务器===
+          .then((res) => {                                    // res就是postman测试api返回的那个内容
             const { data } = res;
 
             if(data.status === 0) {
               message.success('登录成功',2);
-              this.props.history.replace('/')           // =========跳转页面到========= /
+              this.props.history.replace('/')                 // =========跳转页面到========= /
             }else {
-              message.error(data.msg, 2);               // 登录失败，账号或者密码错误
-              this.props.form.resetFields(['password']) // 重置password输入框字段
+              message.error(data.msg, 2);                     // 登录失败，账号或者密码错误
+              this.props.form.resetFields(['password'])       // 重置password输入框字段
             }
         })
           .catch((err) => {
