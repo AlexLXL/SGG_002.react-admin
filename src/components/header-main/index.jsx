@@ -7,6 +7,7 @@ import {reqWeather} from '../../api'
 import MyButton from '../my-button';
 import './index.less';
 import {getItem, removeItem} from "../../utils/storage-tools";
+import menuList from '../../config/menu-config'
 
 class HeaderMain extends Component {
   state = {
@@ -30,6 +31,12 @@ class HeaderMain extends Component {
     if(result) {
       this.setState(result)
     }
+
+    this.title = this.getTitle(this.props);
+  }
+
+  componentWillReceiveProps(nexProps,nexContext) {
+    this.title = this.getTitle(nexProps);
   }
 
   logout = () => {
@@ -44,8 +51,28 @@ class HeaderMain extends Component {
     })
   };
 
+  /**
+   * 获取title
+   */
+
+  getTitle = (props) => {     // 因为有定时器不停渲染render，所以要放在DidMount和componentwillreceiveprops
+    const {pathname} = props.location;
+    for (let i = 0, length = menuList.length; i < length; i++) {
+      if(menuList[i].children) {
+        for (let j = 0; j < menuList[i].children.length; j++) {
+          if(menuList[i].children[j].key === pathname) {
+            return menuList[i].children[j].title;
+          }
+        }
+
+      }else if(menuList[i].key === pathname) {
+        return menuList[i].title;
+      }
+    }
+  };
+
   render() {
-    const { sysTime, weatherImg, weather } = this.state
+    const { sysTime, weatherImg, weather } = this.state;
 
     return <div>
       <div className="header-main-top">
@@ -53,7 +80,7 @@ class HeaderMain extends Component {
         <MyButton onClick={this.logout}>退出</MyButton>
       </div>
       <div className="header-main-bottom">
-        <span className="header-main-left">用户管理</span>
+        <span className="header-main-left">{this.title}</span>
         <div className="header-main-right">
           <span>{dayjs(sysTime).format('YYYY-MM-DD HH:mm:ss')}</span>    {/*上面设置了state，状态systime改变导致render，这里就重新渲染了一次*/}
           <img src={weatherImg} alt=""/>
