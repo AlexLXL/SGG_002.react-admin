@@ -12,12 +12,14 @@ export const reqLogin = (username, password) => Ajax('/login',{ username, passwo
 export const reqValidateUserInfo = (id) => Ajax('/validate/user',{ id },'post');
 
 export const reqWeather = function () { // 为了防止每次有模块加载api就发天气请求
-  return new Promise((resolve, reject) => {
-    jsonp('http://api.map.baidu.com/telematics/v3/weather?location=深圳&output=json&ak=3p49MVra6urFRGOT9s8UBWr2',{},(err, data) => {
+  let cancel = null;
+
+  const promise = new Promise((resolve, reject) => {
+    cancel = jsonp('http://api.map.baidu.com/telematics/v3/weather?location=深圳&output=json&ak=3p49MVra6urFRGOT9s8UBWr2',{},(err, data) => {
       if(!err) {
         const { dayPictureUrl, weather } = data.results[0].weather_data[0];
-        resolve({
-          dayPictureUrl,
+        resolve({         // 不能再这里返回cancel的原因是，这里在new promise里面，外面调用还是会await，没办法立即取消，
+          dayPictureUrl,       // 所以promise和cancel要在同级，并同时返回
           weather
         })
       }else {
@@ -25,7 +27,12 @@ export const reqWeather = function () { // 为了防止每次有模块加载api�
         reject()
       }
     })
-  })
+  });
+
+  return {
+    promise,
+    cancel
+  }
 };
 
 export const reqCategory = (parentId) => Ajax('/manage/category/list',{parentId});
