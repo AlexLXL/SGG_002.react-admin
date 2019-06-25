@@ -12,7 +12,7 @@ const { SubMenu, Item } = Menu;
 
 class LeftNav extends Component{
   static propTypes = {
-    collapsed: PropTypes.bool.isRequired
+    collapsed: PropTypes.bool.isRequired,
   };
 
   createMenu = (menu) => {
@@ -26,6 +26,7 @@ class LeftNav extends Component{
 
   componentWillMount() {
     const {pathname} = this.props.location;
+    let isHome = true;    // 用于url输入 / 时left-nav有默认选中
 
     this.menus = menuList.map((menu) => {
       const children = menu.children;
@@ -43,17 +44,21 @@ class LeftNav extends Component{
           {
             children.map((item) => {
               if(item.key === pathname) {
-                (this.openKey = menu.key)
+                isHome = false;
+                this.openKey = menu.key
               }
               return this.createMenu(item);
             })
           }
         </SubMenu>;
       } else {
+        if(menu.key === pathname) {
+          isHome = false;
+        }
         return this.createMenu(menu); // 一级
       }
     });
-    this.selectedKey = pathname
+    this.selectedKey = isHome ? '/home' : pathname;
   }
 
   render() {
