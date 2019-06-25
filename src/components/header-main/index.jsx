@@ -12,7 +12,7 @@ import menuList from '../../config/menu-config'
 class HeaderMain extends Component {
   state = {
     sysTime: Date.now(),      // 这个是默认的？？
-    weatherImg: 'http://api.map.baidu.com/images/weather/day/qing.png',
+    dayPictureUrl: 'http://api.map.baidu.com/images/weather/day/qing.png',
     weather: '晴'
   };
 
@@ -20,14 +20,14 @@ class HeaderMain extends Component {
     this.username = getItem().username;
   }
   
-  componentDidMount() {
+  async componentDidMount() {
     setInterval(() => {
       this.setState({
         sysTime: Date.now()
       })
     },1000);
 
-    const result = reqWeather();
+    const result = await reqWeather();  // 忘记写await，导致拿不到天气
     if(result) {
       this.setState(result)
     }
@@ -72,7 +72,7 @@ class HeaderMain extends Component {
   };
 
   render() {
-    const { sysTime, weatherImg, weather } = this.state;
+    const { sysTime, dayPictureUrl, weather } = this.state;
 
     return <div>
       <div className="header-main-top">
@@ -83,7 +83,7 @@ class HeaderMain extends Component {
         <span className="header-main-left">{this.title}</span>
         <div className="header-main-right">
           <span>{dayjs(sysTime).format('YYYY-MM-DD HH:mm:ss')}</span>    {/*上面设置了state，状态systime改变导致render，这里就重新渲染了一次*/}
-          <img src={weatherImg} alt=""/>
+          <img src={dayPictureUrl} alt=""/>
           <span>{weather}</span>
         </div>
       </div>

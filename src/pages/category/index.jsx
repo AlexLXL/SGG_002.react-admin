@@ -3,6 +3,7 @@ import { Card, Button, Icon, Table } from 'antd';
 
 import {reqCategory} from '../../api'
 import MyButton from '../../components/my-button'
+import './index.less'
 
 export default class Category extends Component{
   state = {
@@ -27,6 +28,7 @@ export default class Category extends Component{
       {
         title: '操作',
         dataIndex: 'operation',
+        className: 'category-operation',
         render: text => <div>
           <MyButton>修改名称</MyButton>
           <MyButton>查看其子品类</MyButton>
@@ -56,6 +58,7 @@ export default class Category extends Component{
     return <div>
       <Card title="一级分类列表" extra={<Button type="primary"><Icon type="plus" />添加品类</Button>} style={{ width: '100%' }}>
         <Table
+          rowKey="_id"
           columns={columns}
           dataSource={this.state.category}
           bordered
