@@ -7,7 +7,7 @@ export default function ajax(url, data, method='get') { // data用的时候传�
 
   if(method === 'get') {
     reqParam = {
-      params: {data}
+      params: data
     }
   }
 

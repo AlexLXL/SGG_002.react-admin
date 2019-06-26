@@ -10,8 +10,10 @@ import CategoryRename from './category-rename'
 export default class Category extends Component{
   state = {
     category: [],
+    subCategory: [],
     isShowAddCategory: false,
-    isShowRename:false
+    isShowRename:false,
+    isSubCategory: false
   };
 
   text = {};
@@ -37,6 +39,7 @@ export default class Category extends Component{
   };*/
 
   saveCategory = (text) => {
+
     return () => {
       this.text = text;
       this.setState({
@@ -44,6 +47,25 @@ export default class Category extends Component{
       })
     }
   };
+
+  showSubCategory = (text) => {
+    return async () => {
+      this.levelText = text;
+      const result1 = await reqCategory(text._id);
+      if(result1) {
+        this.setState({
+          subCategory: result1,
+          isSubCategory: true
+        })
+      }
+    }
+  };
+
+  showLevelOne = () => {
+    this.setState({
+      isSubCategory: false
+    })
+  }
 
   categoryRename = () => {
     const {form} = this.updateCategoryNameForm.props;
@@ -54,9 +76,17 @@ export default class Category extends Component{
         const {categoryName} = value;
         const categoryId = this.text._id;
         const result = await reqUpdateName(categoryId, categoryName);
+
         if(result) {
+          let categoryData = this.state.category;
+          let dataName = 'category';
+          if(this.text.parentId !== '0') {
+            categoryData = this.state.subCategory;
+            dataName = 'subCategory';
+          }
+
           // 复制一份this.state.category，不修改原数据
-          const newCategory = this.state.category.map((item) => {
+          const newCategory = categoryData.map((item) => {
             let { _id, name, parentId } = item;
             if (_id === categoryId) {
               name = categoryName;
@@ -74,7 +104,7 @@ export default class Category extends Component{
           form.resetFields('categoryName');
 
           this.setState({
-            category: newCategory,
+            [dataName]: newCategory,
             isShowRename: false
           })
         }
@@ -102,12 +132,17 @@ export default class Category extends Component{
           this.setState({
             isShowAddCategory: false
           });
-          this.addCategoryForm.props.form.resetFields(['parentId','categoryName'])
+          this.addCategoryForm.props.form.resetFields(['parentId','categoryName']);
           message.success('提交成功');
           if(result.parentId === '0'){
             this.setState({
               category: [...this.state.category, result]
             });
+          }else if(this.state.isSubCategory && result.parentId === this.levelText._id) {
+            // 是二级分类，且是当前二级分类页面才显示
+            this.setState({
+              subCategory:[...this.state.subCategory, result]
+            })
           }
         }
       }
@@ -124,7 +159,7 @@ export default class Category extends Component{
   }
 
   render() {
-    const { category, isShowAddCategory, isShowRename } = this.state;
+    const { category, isShowAddCategory, isShowRename, subCategory, isSubCategory } = this.state;
     const columns = [
       {
         title: '品类名称',
@@ -136,7 +171,9 @@ export default class Category extends Component{
         className: 'category-operation',
         render: text => <div>
           <MyButton onClick={this.saveCategory(text)}>修改名称</MyButton>
-          <MyButton>查看其子品类</MyButton>
+          {
+            isSubCategory ? null : <MyButton onClick={this.showSubCategory(text)}>查看其子品类</MyButton>
+          }
         </div>
       },
     ];
@@ -160,11 +197,15 @@ export default class Category extends Component{
       },
     ];*/
 
-    return <Card title="一级分类列表" extra={<Button type="primary" onClick={this.hideShowModal('isShowAddCategory', true)}><Icon type="plus" />添加品类</Button>} style={{ width: '100%' }}>
+    return <Card
+      title={ isSubCategory ? <div><MyButton onClick={this.showLevelOne}>一级分类</MyButton> <Icon type="arrow-right" />&nbsp;{this.levelText.name}</div> : "一级分类"}
+      extra={<Button type="primary" onClick={this.hideShowModal('isShowAddCategory', true)}><Icon type="plus" />添加品类</Button>}
+      style={{ width: '100%' }}
+    >
       <Table
         rowKey="_id"
         columns={columns}
-        dataSource={category}
+        dataSource={ isSubCategory ? subCategory : category }
         bordered
         pagination={{
           showQuickJumper: true,
@@ -193,7 +234,7 @@ export default class Category extends Component{
         cancelText="取消"
         width={300}
       >
-        <CategoryRename categoryName={this.text.name } wrappedComponentRef={(form) => this.updateCategoryNameForm = form}/>
+        <CategoryRename categoryName={this.text.name} wrappedComponentRef={(form) => this.updateCategoryNameForm = form}/>
       </Modal>
     </Card>
   }

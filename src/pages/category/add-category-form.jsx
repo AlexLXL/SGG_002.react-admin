@@ -12,7 +12,6 @@ class AddCategoryForm extends Component{
 
   validator = (rule, value, callback) => {  // 写成了自定义函数导致里面的this指向underfined，报的错却是没有category属性
     if(!value) return callback('请输入分类名称');
-    console.log(this)
 
     const result = this.props.category.find((item) => {return item.name === value});
     if(result) {
@@ -20,7 +19,7 @@ class AddCategoryForm extends Component{
     }else {
       callback()
     }
-  }
+  };
 
   render() {
     const {category} = this.props;
