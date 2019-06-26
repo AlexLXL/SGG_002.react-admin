@@ -25,8 +25,13 @@ class LeftNav extends Component{
   };
 
   componentWillMount() {
-    const {pathname} = this.props.location;
+    let {pathname} = this.props.location;
     let isHome = true;    // 用于url输入 / 时left-nav有默认选中
+
+    const pathnameReg = /^\/product\//;
+    if(pathnameReg.test(pathname)) {
+      pathname = '/product'
+    }
 
     this.menus = menuList.map((menu) => {
       const children = menu.children;

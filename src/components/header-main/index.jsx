@@ -64,7 +64,13 @@ class HeaderMain extends Component {
    * 获取title
    */
   getTitle = (props) => {     // 因为有定时器不停渲染render，所以要放在DidMount和componentwillreceiveprops
-    const {pathname} = props.location;
+    let {pathname} = props.location;
+
+    const pathnameReg = /^\/product\//;
+    if(pathnameReg.test(pathname)) {
+      pathname = '/product'
+    }
+
     for (let i = 0, length = menuList.length; i < length; i++) {
       if(menuList[i].children) {
         for (let j = 0; j < menuList[i].children.length; j++) {
