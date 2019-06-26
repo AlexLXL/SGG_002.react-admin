@@ -41,4 +41,6 @@ export const reqAddCategory = (parentId, categoryName) => Ajax('/manage/category
 
 export const reqUpdateName = (categoryId, categoryName) => Ajax('/manage/category/update',{categoryId, categoryName},'post');
 
+export const reqProduct = (pageNum, pageSize) => Ajax('/manage/product/list',{pageNum, pageSize});
+
 
