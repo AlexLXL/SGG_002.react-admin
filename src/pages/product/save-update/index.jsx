@@ -1,9 +1,11 @@
 import React,{Component} from 'react';
 import { Card, Icon, Form, Input, Cascader, InputNumber, Button } from 'antd';
+import draftToHtml from 'draftjs-to-html';
+import { convertToRaw } from 'draft-js';
 
 import RichTextEditor from './rich-text-editor'
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
-import {reqCategory} from '../../../api'
+import { reqCategory, reqAddProduct } from '../../../api'
 import './index.less'
 
 const Item = Form.Item;
@@ -12,6 +14,8 @@ class SaveUpdate extends Component{
   state = {
     options: [],
   };
+
+  richTextEditorRef = React.createRef();  // ref除了可以拿真是DOM对象，还可以拿组件的实例对象
 
   async componentDidMount() {
     const result = await reqCategory('0');    // 初始化级联列表数据
@@ -25,11 +29,6 @@ class SaveUpdate extends Component{
       })
     })
   }
-/*{
-  value: 'jiangsu',
-  label: 'Jiangsu',
-  isLeaf: false,
-},*/
 
   loadData = async selectedOptions => {
     // console.log(selectedOptions)
@@ -54,7 +53,39 @@ class SaveUpdate extends Component{
       options: [...this.state.options],
     });
   };
-  
+
+  addProduct = (e) => {
+    e.preventDefault();
+    this.props.form.validateFields((err, values) => {
+      if(!err) {
+        const { name, desc, price, categoriesId } = values;   // 应为要发请求，所以先把值拿了
+
+        const {editorState} = this.richTextEditorRef.current.state;
+        const detail = draftToHtml(convertToRaw(editorState.getCurrentContent()))
+
+        let pCategoryId = '0';
+        let categoryId = '';
+
+        if (categoriesId.length === 1) {
+          categoryId = categoriesId[0];
+        } else {
+          pCategoryId = categoriesId[0];
+          categoryId = categoriesId[1];
+        }
+
+        const result = reqAddProduct({ name, desc, price, pCategoryId, categoryId, detail });
+
+        if(result) {
+          this.props.history.push("/product/index")
+        }
+      }
+    })
+  };
+
+  goBack = () => {
+    this.props.history.push("/product/index");
+  };
+
   render() {
     const {getFieldDecorator} = this.props.form;
 
@@ -74,11 +105,11 @@ class SaveUpdate extends Component{
       <Card
         title={
         <div className="card">
-          <Icon type="arrow-left" className="arrow-icon" /> &nbsp;添加商品
+          <Icon type="arrow-left" className="arrow-icon" onClick={this.goBack}/> &nbsp;添加商品
         </div>
       }
         style={{ width: '100%' }}>
-        <Form {...formItemLayout}>
+        <Form {...formItemLayout} onSubmit={this.addProduct}>
           <Item label="商品名称:">
             {
               getFieldDecorator(
@@ -92,25 +123,53 @@ class SaveUpdate extends Component{
 
           </Item>
           <Item label="商品描述:">
-            <Input placeholder="请输入商品描述"/>
+            {
+              getFieldDecorator(
+                'desc',{
+                  rules: [
+                    { required: true, message: 'Please 填!'}
+                  ]
+                }
+              )(<Input placeholder="请输入商品描述"/>)
+            }
           </Item>
           <Item label="选择分类:" wrapperCol={{span: 8}}>
-            <Cascader
-              options={options}
-              loadData={this.loadData}  // 点击请求级联列表第二层数据
-              changeOnSelect
-            />
+            {
+              getFieldDecorator(
+                'categoriesId',{
+                  rules: [
+                    { required: true, message: 'Please 填!'}
+                  ]
+                }
+              )(
+                <Cascader
+                  options={options}
+                  loadData={this.loadData}  // 点击请求级联列表第二层数据
+                  changeOnSelect
+                />
+              )
+            }
           </Item>
           <Item label="商品价格:">
-            <InputNumber
-              className="price-input"
-              defaultValue={''}
-              formatter={value => `￥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              parser={value => value.replace(/￥\s?|(,*)/g, '')}
-            />
+            {
+              getFieldDecorator(
+                'price',{
+                  rules: [
+                    { required: true, message: 'Please 填!'}
+                  ]
+                }
+              )(
+                <InputNumber
+                  className="price-input"
+                  formatter={value => `￥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  parser={value => value.replace(/￥\s?|(,*)/g, '')}
+                />
+              )
+            }
+
           </Item>
           <Item wrapperCol={{span: 20}}>
-            <RichTextEditor />
+            <RichTextEditor ref={this.richTextEditorRef}/>
           </Item>
           <Item>
             <Button type="primary" className="add-product-button" htmlType="submit">提交</Button>
