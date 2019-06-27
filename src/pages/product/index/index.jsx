@@ -15,8 +15,9 @@ export default class Index extends Component{
   async componentDidMount() {
     const result = await reqProduct(1, 3);
     if(result) {
+      const newList = result.list.map((item) => { item.key=item._id; return item });  // 显示的商品添加key属性
       this.setState({
-        products: result.list
+        products: newList
       });
     }
   }
@@ -29,6 +30,8 @@ export default class Index extends Component{
   };
 
   render() {
+    const {products} = this.state;
+
     const columns = [
       {
         title: '商品名称',
@@ -61,7 +64,6 @@ export default class Index extends Component{
         </div>,
       },
     ];
-    const {products} = this.state;
     /*const data = [
       {
         key: '1',

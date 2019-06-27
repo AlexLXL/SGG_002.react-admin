@@ -13,7 +13,8 @@ export default class Category extends Component{
     subCategory: [],
     isShowAddCategory: false,
     isShowRename:false,
-    isSubCategory: false
+    isSubCategory: false,
+    loading: true
   };
 
   text = {};
@@ -48,16 +49,38 @@ export default class Category extends Component{
     }
   };
 
-  showSubCategory = (text) => {
-    return async () => {
-      this.levelText = text;
-      const result1 = await reqCategory(text._id);
-      if(result1) {
+  fetchCategory = async (id) => {
+    this.setState({
+      loading: true
+    });
+
+    const result = await reqCategory(id);
+    if(result) {
+      if(id === '0') {
         this.setState({
-          subCategory: result1,
+          category:result
+        })
+      }else {
+        this.setState({
+          subCategory: result,
           isSubCategory: true
         })
       }
+    }
+
+    this.setState({
+      loading: false,
+    });
+  };
+
+  componentDidMount() {
+    this.fetchCategory('0');
+  }
+
+  showSubCategory = (text) => {
+    return async () => {
+      this.levelText = text;
+      this.fetchCategory(text._id);
     }
   };
 
@@ -65,7 +88,7 @@ export default class Category extends Component{
     this.setState({
       isSubCategory: false
     })
-  }
+  };
 
   categoryRename = () => {
     const {form} = this.updateCategoryNameForm.props;
@@ -149,17 +172,8 @@ export default class Category extends Component{
     })
   };
 
-  async componentDidMount() {
-    const result = await reqCategory('0');
-    if(result) {
-      this.setState({
-        category:result
-      })
-    }
-  }
-
   render() {
-    const { category, isShowAddCategory, isShowRename, subCategory, isSubCategory } = this.state;
+    const { loading ,category, isShowAddCategory, isShowRename, subCategory, isSubCategory } = this.state;
     const columns = [
       {
         title: '品类名称',
@@ -213,6 +227,7 @@ export default class Category extends Component{
           pageSizeOptions: ['3','6','9'],
           defaultPageSize: 3
         }}
+        loading={loading}
       />
       <Modal
         title="添加分类"
