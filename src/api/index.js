@@ -49,4 +49,6 @@ export const reqUpdateProduct = ({name, desc, price, categoryId, pCategoryId, de
 
 export const reqRemovePic = (name, id) => Ajax('/manage/img/delete', {name, id}, 'post');
 
+export const reqSearchProduct = ({ searchName, searchContent, pageNum, pageSize }) => Ajax('/manage/product/search', { [searchName]: searchContent, pageNum, pageSize });
+
 

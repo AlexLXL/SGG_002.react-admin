@@ -2,7 +2,7 @@ import React,{Component} from 'react';
 import { Button, Card, Table, Input, Select, Icon } from 'antd';
 import MyButton from '../../../components/my-button'
 
-import {reqProduct} from '../../../api'
+import { reqProduct, reqSearchProduct } from '../../../api'
 import './index.less'
 
 const { Option } = Select;
@@ -11,7 +11,11 @@ export default class Index extends Component{
   state = {
     products: [],
     total: '',
-    loading: true
+    loading: true,
+    searchName: 'productName',
+    searchContent: '',
+    pageNum: 1,
+    pageSize: 3,
   };
 
   componentDidMount() {
@@ -23,12 +27,21 @@ export default class Index extends Component{
       loading: true
     });
 
-    const result = await reqProduct(pageNum, pageSize);
+    const { searchContent, searchName } = this.state;
+    let promise = null;
+    if(this.isSearch && searchContent) {
+      promise = reqSearchProduct({ searchName, searchContent, pageNum, pageSize });
+    }else {
+      promise = reqProduct(pageNum, pageSize);
+    }
+    const result = await promise;
     if(result) {
       this.setState({
         total: result.total,
         products: result.list,
-        loading: false
+        loading: false,
+        pageNum,
+        pageSize
       });
     }
   };
@@ -42,7 +55,38 @@ export default class Index extends Component{
       this.props.history.push("/product/saveupdate",text)
     }
   };
-  
+
+  handleChange = (stateKey) => {
+    return (e) => {
+      let value = '';
+      if(stateKey === 'searchName') {
+        value = e;
+      }else {
+        value = e.target.value;
+        if(!value) this.isSearch = false;
+      }
+      this.setState({
+        [stateKey]: value
+      });
+    };
+  };
+
+  seachProduct = async () => {
+    const { searchName, searchContent, pageNum, pageSize } = this.state;
+    const result = await reqSearchProduct({ searchName, searchContent, pageNum, pageSize });
+    this.isSearch = true;
+    if(result) {
+      this.setState({
+        products: result.list,
+        total: result.total,
+        pageNum,
+        pageSize,
+        loading: false,
+      })
+    }
+
+  };
+
   render() {
     const { products, total, loading } = this.state;
 
@@ -83,12 +127,12 @@ export default class Index extends Component{
       <Card
         title={
           <div>
-          <Select defaultValue="0" style={{ width: 120 }} onChange={this.handleChange}>
-            <Option key={0} value="0">根据商品名称</Option>
-            <Option key={0} value="1">根据商品描述</Option>
+          <Select defaultValue="productName" style={{ width: 120 }} onChange={this.handleChange('searchName')}>
+            <Option key={0} value="productName">根据商品名称</Option>
+            <Option key={1} value="productDesc">根据商品描述</Option>
           </Select>
-          <Input placeholder="关键字" className="seach-input"/>
-          <Button type="primary">搜索</Button>
+          <Input placeholder="关键字" className="seach-input"  onChange={this.handleChange('searchContent')}/>
+          <Button type="primary" onClick={this.seachProduct}>搜索</Button>
         </div>}
         extra={<Button type="primary" onClick={this.addProduct}><Icon type="plus" />添加产品</Button>}
         style={{ width: '100%' }}
