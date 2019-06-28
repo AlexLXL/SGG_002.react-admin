@@ -212,13 +212,13 @@ class SaveUpdate extends Component{
                 />
               )
             }
+          </Item>
+          {
+            product ? <Item label="商品图片:">
+             <UpdateImg imgList={product.imgs} id={product._id}/>
+            </Item> : null
+          }
 
-          </Item>
-          <Item label="商品图片:">
-            {
-              product ? <UpdateImg imgList={product.imgs} id={product._id}/> : ''
-            }
-          </Item>
           <Item wrapperCol={{span: 20}}>
             <RichTextEditor ref={this.richTextEditorRef} detail={product ? product.detail : ''}/>
           </Item>

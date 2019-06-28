@@ -28,14 +28,6 @@ export default class PicturesWall extends Component {
         url: `http://localhost:5000/upload/` + item
       }
     })
-      /*[
-      {
-        uid: '-1',
-        name: 'xxx.png',
-        status: 'done',
-        url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-      },
-    ],*/
   };
 
   /**
@@ -54,7 +46,7 @@ export default class PicturesWall extends Component {
     }
 
     this.setState({
-      previewImage: file.url || file.preview,
+      previewImage: file.url || file.thumbUrl,  // 修补bug
       previewVisible: true,
     });
   };
@@ -65,7 +57,6 @@ export default class PicturesWall extends Component {
    * @param fileList
    */
   handleChange = async ({ file, fileList }) => {  // 加入第一个参数file
-    // console.log(file);
 
     if (file.status === 'uploading') {
       // 加载中
@@ -77,10 +68,9 @@ export default class PicturesWall extends Component {
       message.error('上传失败', 2)
     }else {
       // 删除图片
-      const name = file.name;
+      const name = (file.response && file.response.data.name) || file.name; // 修补bug
       const id = this.props.id;
-      // console.log(name, id);
-      const result = await reqRemovePic(name, id);
+      const result = await reqRemovePic(name, id);   // 修补bug
       if (result) {
         message.success('删除成功', 2);
       }else {
