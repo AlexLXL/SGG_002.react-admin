@@ -51,4 +51,10 @@ export const reqRemovePic = (name, id) => Ajax('/manage/img/delete', {name, id},
 
 export const reqSearchProduct = ({ searchName, searchContent, pageNum, pageSize }) => Ajax('/manage/product/search', { [searchName]: searchContent, pageNum, pageSize });
 
+export const reqRoleList = () => Ajax('/manage/role/list');
 
+export const reqAddRole = (name) => Ajax('/manage/role/add',{name},'post');
+
+export const reqUpdateRole = (_id, auth_name, menus) => Ajax('/manage/role/update',{_id, auth_name, menus},'post');
+
+export const reqUserList =() => Ajax('/manage/user/list');
