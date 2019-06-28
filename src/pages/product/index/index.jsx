@@ -33,13 +33,16 @@ export default class Index extends Component{
     }
   };
 
-  /**
-   * 添加产品
-   */
   addProduct = () => {
     this.props.history.push('/product/saveupdate')
   };
 
+  modifyProductDetail = (text) => {
+    return () => {
+      this.props.history.push("/product/saveupdate",text)
+    }
+  };
+  
   render() {
     const { products, total, loading } = this.state;
 
@@ -68,27 +71,13 @@ export default class Index extends Component{
       },
       {
         title: '操作',
-        dataIndex: 'operator',
+        // dataIndex: 'operator',
         render: text => <div>
           <MyButton>详情</MyButton>
-          <MyButton>修改</MyButton>
+          <MyButton onClick={this.modifyProductDetail(text)}>修改</MyButton>
         </div>,
       },
     ];
-    /*const data = [
-      {
-        key: '1',
-        name: 'John Brown',
-        desc: 'hehe',
-        price: '￥300,000.00',
-      },
-      {
-        key: '2',
-        name: 'Jim Green',
-        desc: 'hehe',
-        price: '￥1,256,000.00',
-      },
-    ];*/
 
     return <div>
       <Card

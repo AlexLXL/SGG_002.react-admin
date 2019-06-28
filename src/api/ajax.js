@@ -11,7 +11,7 @@ export default function ajax(url, data, method='get') { // data用的时候传�
     }
   }
 
-  return axios[method](url,reqParam)     // 没加配置对象导致一直返回的statue是1.===这里涉及跨域，用到代理服务器=== 返回的promise对象？？===
+  return axios[method](url, reqParam)     // 没加配置对象导致一直返回的statue是1.===这里涉及跨域，用到代理服务器=== 返回的promise对象？？===
     .then((res) => {                              // res就是postman测试api返回的那个内容
       const { data } = res;
 

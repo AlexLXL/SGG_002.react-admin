@@ -5,8 +5,9 @@ import { convertToRaw } from 'draft-js';
 
 import RichTextEditor from './rich-text-editor'
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
-import { reqCategory, reqAddProduct } from '../../../api'
+import { reqCategory, reqAddProduct, reqUpdateProduct } from '../../../api'
 import './index.less'
+import UpdateImg from './updateImg'
 
 const Item = Form.Item;
 
@@ -17,18 +18,49 @@ class SaveUpdate extends Component{
 
   richTextEditorRef = React.createRef();  // ref除了可以拿真是DOM对象，还可以拿组件的实例对象
 
-  async componentDidMount() {
-    const result = await reqCategory('0');    // 初始化级联列表数据
-    this.setState({
-      options: result.map((item) => {
-        return {
-          value: item._id,
-          label: item.name,
-          isLeaf: false
-        }
-      })
-    })
+  componentDidMount() {
+    this.getCategories('0');
+
+    const product = this.props.location.state;
+    let categoriesId = [];
+    if(product) {
+      if(product.pCategoryId !== '0') {
+        categoriesId.push(product.pCategoryId);
+        this.getCategories(product.pCategoryId)
+      }
+      categoriesId.push(product.categoryId);
+    }
+    this.categoriesId = categoriesId;
   }
+
+  getCategories = async (parentId) => {
+    const result = await reqCategory(parentId);    // 初始化级联列表数据
+    if(parentId === '0') {
+      this.setState({
+        options: result.map((item) => {
+          return {
+            value: item._id,
+            label: item.name,
+            isLeaf: false
+          }
+        })
+      })
+    }else {
+      this.setState({
+        options: this.state.options.map((item) => {
+          if(item.value === parentId) {   // 确定是点击的当前一级列表才显示
+            item.children = result.map((item) => {
+              return {
+                value: item._id,
+                label: item.name,
+              }
+            })
+          }
+          return item;
+        })
+      });
+    }
+  };
 
   loadData = async selectedOptions => {
     // console.log(selectedOptions)
@@ -42,7 +74,7 @@ class SaveUpdate extends Component{
       // 将loading改为false
       targetOption.loading = false;
 
-      targetOption.children = result.map((item) => {    // children属性就是二级级联列表数据
+      targetOption.children = result.map((item) => {    // children属性就是二级级联列表数据,==== 拿到数据列表加children ====
         return {
           label: item.name,
           value: item._id,
@@ -56,7 +88,7 @@ class SaveUpdate extends Component{
 
   addProduct = (e) => {
     e.preventDefault();
-    this.props.form.validateFields((err, values) => {
+    this.props.form.validateFields(async (err, values) => {
       if(!err) {
         const { name, desc, price, categoriesId } = values;   // 应为要发请求，所以先把值拿了
 
@@ -73,8 +105,18 @@ class SaveUpdate extends Component{
           categoryId = categoriesId[1];
         }
 
-        const result = reqAddProduct({ name, desc, price, pCategoryId, categoryId, detail });
-
+        let pomise = null;
+        let product = this.props.location.state;
+        if(product) {
+          const id = product._id;
+          console.log(product);
+          console.log(name, desc, price, pCategoryId, categoryId, detail, id);
+          pomise = reqUpdateProduct({ name, desc, price, categoryId, pCategoryId, detail, _id:id });
+        }else {
+          pomise = reqAddProduct({ name, desc, price, pCategoryId, categoryId, detail });
+        }
+        const result = await pomise;
+        console.log(result);
         if(result) {
           this.props.history.push("/product/index")
         }
@@ -88,9 +130,7 @@ class SaveUpdate extends Component{
 
   render() {
     const {getFieldDecorator} = this.props.form;
-
     const { options } = this.state;
-
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },
@@ -101,6 +141,8 @@ class SaveUpdate extends Component{
         sm: { span: 13 },
       },
     };
+    const product = this.props.location.state;
+
     return <div>
       <Card
         title={
@@ -116,7 +158,8 @@ class SaveUpdate extends Component{
                 'name',{
                   rules: [
                     { required: true, message: 'Please 填!'}
-                  ]
+                  ],
+                  initialValue: product ? product.name : ''
                 }
               )(<Input placeholder="请输入商品名称"/>)
             }
@@ -128,7 +171,8 @@ class SaveUpdate extends Component{
                 'desc',{
                   rules: [
                     { required: true, message: 'Please 填!'}
-                  ]
+                  ],
+                  initialValue: product ? product.desc : ''
                 }
               )(<Input placeholder="请输入商品描述"/>)
             }
@@ -139,7 +183,8 @@ class SaveUpdate extends Component{
                 'categoriesId',{
                   rules: [
                     { required: true, message: 'Please 填!'}
-                  ]
+                  ],
+                  initialValue: product ? this.categoriesId : ''
                 }
               )(
                 <Cascader
@@ -156,7 +201,8 @@ class SaveUpdate extends Component{
                 'price',{
                   rules: [
                     { required: true, message: 'Please 填!'}
-                  ]
+                  ],
+                  initialValue: product ? product.price : ''
                 }
               )(
                 <InputNumber
@@ -168,8 +214,13 @@ class SaveUpdate extends Component{
             }
 
           </Item>
+          <Item label="商品图片:">
+            {
+              product ? <UpdateImg imgList={product.imgs} id={product._id}/> : ''
+            }
+          </Item>
           <Item wrapperCol={{span: 20}}>
-            <RichTextEditor ref={this.richTextEditorRef}/>
+            <RichTextEditor ref={this.richTextEditorRef} detail={product ? product.detail : ''}/>
           </Item>
           <Item>
             <Button type="primary" className="add-product-button" htmlType="submit">提交</Button>
