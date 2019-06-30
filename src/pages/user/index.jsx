@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import AddUserForm from './add-user-form';
 import UpdateUserForm from './update-user-form';
 import MyButton from '../../components/my-button';
-import {reqUserList} from '../../api'
+import { reqUserList, reqAddUser } from '../../api'
 
 export default class User extends Component {
   state = {
@@ -26,7 +26,17 @@ export default class User extends Component {
   }
 
   //创建用户的回调函数
-  addUser = () => {};
+  addUser = () => {
+    this.addUserForm.props.form.validateFields( async (err, value) => {
+      const result = await reqAddUser(value);
+      if(result) {
+        this.setState({
+          isShowAddUserModal: false,
+          users: [...this.state.users, result]
+        })
+      }
+    })
+  };
   
   updateUser = () => {
   
@@ -37,8 +47,7 @@ export default class User extends Component {
   };
   
   render () {
-    const {users, isShowAddUserModal, isShowUpdateUserModal} = this.state;
-
+    const {users, roles, isShowAddUserModal, isShowUpdateUserModal} = this.state;
     const columns = [
       {
         title: '用户名',
@@ -61,7 +70,8 @@ export default class User extends Component {
         title: '所属角色',
         dataIndex: 'role_id',
         render: role_id => {
-
+          const role = roles.find((item) => role_id === item._id);
+          return role && role.name;
         }
       },
       {
@@ -98,18 +108,18 @@ export default class User extends Component {
           title="创建用户"
           visible={isShowAddUserModal}
           onOk={this.addUser}
-          onCancel={this.toggleDisplay('isShowAddUserModal', true)}
+          onCancel={this.toggleDisplay('isShowAddUserModal', false)}
           okText='确认'
           cancelText='取消'
         >
-          <AddUserForm wrappedComponentRef={(form) => this.addUserForm = form}/>
+          <AddUserForm wrappedComponentRef={(form) => this.addUserForm = form} roles={roles}/>
         </Modal>
   
         <Modal
           title="更新用户"
           visible={isShowUpdateUserModal}
           onOk={this.updateUser}
-          onCancel={this.toggleDisplay('isShowUpdateUserModal', true)}
+          onCancel={this.toggleDisplay('isShowUpdateUserModal', false)}
           okText='确认'
           cancelText='取消'
         >

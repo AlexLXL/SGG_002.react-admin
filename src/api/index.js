@@ -58,3 +58,5 @@ export const reqAddRole = (name) => Ajax('/manage/role/add',{name},'post');
 export const reqUpdateRole = (_id, auth_name, menus) => Ajax('/manage/role/update',{_id, auth_name, menus},'post');
 
 export const reqUserList =() => Ajax('/manage/user/list');
+
+export const reqAddUser = ({username, password, phone, email, role_id}) => Ajax('/manage/user/add',{username, password, phone, email, role_id},'post');
