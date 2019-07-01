@@ -4,9 +4,9 @@ import { Link, withRouter } from 'react-router-dom'
 import PropTypes from 'prop-types'
 
 import menuList from '../../config/menu-config'
-
 import logo from '../../assets/images/logo.png'
 import './leftNav.less'
+import {getItem} from '../../utils/storage-tools'
 
 const { SubMenu, Item } = Menu;
 
@@ -27,42 +27,61 @@ class LeftNav extends Component{
   componentWillMount() {
     let {pathname} = this.props.location;
     let isHome = true;    // 用于url输入 / 时left-nav有默认选中
-
     const pathnameReg = /^\/product\//;
+    const menus = getItem().role.menus;
+
     if(pathnameReg.test(pathname)) {
       pathname = '/product'
     }
 
-    this.menus = menuList.map((menu) => {
-      const children = menu.children;
+    this.menus = menuList.reduce((prev, curr) => {    // 权限管理就是根据配置文件和权限数组生成当前用户的配置文件
+      const children = curr.children;
 
       if (children) { // 二级菜单
-        return <SubMenu
-          key={menu.key}
+        let isShowSubMenu = false;
+        const subMenu =  <SubMenu
+          key={curr.key}
           title={
             <span>
-              <Icon type={menu.icon} />
-              <span>{menu.title}</span>
+              <Icon type={curr.icon} />
+              <span>{curr.title}</span>
             </span>
           }
         >
           {
-            children.map((item) => {
-              if(item.key === pathname) {
-                isHome = false;
-                this.openKey = menu.key
+            children.reduce((prev, current) => {
+              const menu = menus.find((menu) => menu === current.key);
+
+              if (menu) {
+                if (current.key === pathname) {
+                  // 说明当前地址是一个二级菜单，需要展开一级菜单
+                  // 初始化展开的菜单
+                  this.openKey = curr.key;
+                  isHome = false;
+                }
+                // 找到了显示
+                isShowSubMenu = true;
+                return [...prev, this.createMenu(current)];
+              } else {
+                return prev;
               }
-              return this.createMenu(item);
-            })
+            },[])
           }
         </SubMenu>;
-      } else {
-        if(menu.key === pathname) {
-          isHome = false;
+
+        return isShowSubMenu ? [...prev, subMenu] : prev;
+      } else {  // 一级
+        const menu = menus.find((menu) => menu === curr.key);
+
+        if(menu) {
+          if (curr.key === pathname) isHome = false;
+          // 匹配上就添加进行，将来会显示菜单
+          return [...prev, this.createMenu(curr)];
+        } else {
+          return prev;
         }
-        return this.createMenu(menu); // 一级
       }
-    });
+    }, []);
     this.selectedKey = isHome ? '/home' : pathname;
   }
 
@@ -78,74 +97,6 @@ class LeftNav extends Component{
         {
           this.menus
         }
-        {/*<Item key="1">
-          <Link to="/home">
-            <Icon type="home" />
-            <span>首页</span>
-          </Link>
-        </Item>
-        <SubMenu
-          key="sub1"
-          title={
-            <span>
-              <Icon type="appstore" />
-              <span>商品</span>
-            </span>
-          }
-        >
-          <Item key="2">
-            <Link to="/category">
-              <Icon type="bars" />
-              <span>品类管理</span>
-            </Link>
-          </Item>
-          <Item key="3">
-            <Link to="product/index">
-              <Icon type="tool" />
-              <span>商品管理</span>
-            </Link>
-          </Item>
-        </SubMenu>
-        <Item key="4">
-          <Link to="/user">
-            <Icon type="user" />
-            <span>用户管理</span>
-          </Link>
-        </Item>
-        <Item key="5">
-          <Link to="/role">
-            <Icon type="pull-request" />
-            <span>权限管理</span>
-          </Link>
-        </Item>
-        <SubMenu
-          key="sub2"
-          title={
-            <span>
-                  <Icon type="area-chart" />
-                  <span>图表图形</span>
-                </span>
-          }
-        >
-          <Item key="6">
-            <Link to="/charts/bar">
-              <Icon type="fund" />
-              <span>柱形图</span>
-            </Link>
-          </Item>
-          <Item key="7">
-            <Link to="/charts/line">
-              <Icon type="fund" />
-              <span>折线图</span>
-            </Link>
-          </Item>
-          <Item key="8">
-            <Link to="/charts/pie">
-              <Icon type="fund" />
-              <span>饼图</span>
-            </Link>
-          </Item>
-        </SubMenu>*/}
       </Menu>
     </div>
   }
